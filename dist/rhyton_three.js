@@ -122,6 +122,7 @@ var RhytonThree = function () {
             this.initScene();
             this.initCamera();
             this.initRender();
+            this.render();
         } else {
             console.log('没有配置项');
         }
@@ -153,6 +154,8 @@ var RhytonThree = function () {
             this.camera.position.z = 50;
             this.camera.lookAt(new THREE.Vector3(0, 0, 0));
         }
+        //初始化渲染器
+
     }, {
         key: 'initRender',
         value: function initRender() {
@@ -160,8 +163,16 @@ var RhytonThree = function () {
             webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
             webGLRenderer.setSize(this.rendererCfg.width, this.rendererCfg.height);
             webGLRenderer.shadowMapEnabled = true;
-            this.render = webGLRenderer;
+            this.renderer = webGLRenderer;
             document.querySelector(this.el).appendChild(webGLRenderer.domElement);
+        }
+        //渲染
+
+    }, {
+        key: 'render',
+        value: function render() {
+            requestAnimationFrame(this.render);
+            this.renderer.render(this.scene, this.camera);
         }
     }]);
 

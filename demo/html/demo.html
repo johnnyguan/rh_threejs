@@ -8,10 +8,12 @@
     <script src="../../dist/rhyton_three.js"></script>
     <script type="text/javascript" src="../libs/stats.js"></script>
     <style>
-        body {
-            /* set margin to 0 and overflow to hidden, to go fullscreen */
+        html,body {
             margin: 0;
-            overflow: hidden;
+            height: 100%;
+        }
+        #WebGL-output {
+            height: 100%;
         }
     </style>
 </head>
@@ -25,7 +27,13 @@
 
 <!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
-    var a = new RhytonThree();
+    var a = new RhytonThree({
+        el:'#WebGL-output',
+        renderer: {
+            width: document.querySelector('#WebGL-output').clientWidth,
+            height: document.querySelector('#WebGL-output').clientHeight
+        }
+    });
     
 </script>
 </body>

@@ -1,8 +1,8 @@
 import is from '../utils/is.js'
 class RhytonThree {
- constructor(cfg) {
+    constructor(cfg) {
         if (is.object(cfg)) {
-            if(!cfg.el){
+            if (!cfg.el) {
                 console.log('未设置画布容器');
                 return
             }
@@ -13,7 +13,7 @@ class RhytonThree {
             if (!is.object(cfg.renderer)) {
                 console.log('未设置渲染器大小');
                 return
-            }else {
+            } else {
                 this.rendererCfg = cfg.renderer;
             }
 
@@ -21,7 +21,8 @@ class RhytonThree {
             this.initScene();
             this.initCamera();
             this.initRender();
-        }else {
+            this.render();
+        } else {
             console.log('没有配置项');
         }
     }
@@ -30,7 +31,7 @@ class RhytonThree {
         this.scene = new THREE.Scene();
     }
     //初始化相机
- initCamera() {
+    initCamera() {
         if (!is.object(this.cameraCfg)) {
             this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         } else {
@@ -45,13 +46,19 @@ class RhytonThree {
         this.camera.position.z = 50;
         this.camera.lookAt(new THREE.Vector3(0, 0, 0));
     }
-    initRender(){
+    //初始化渲染器
+    initRender() {
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
-        webGLRenderer.setSize(this.rendererCfg.width,this.rendererCfg.height);
+        webGLRenderer.setSize(this.rendererCfg.width, this.rendererCfg.height);
         webGLRenderer.shadowMapEnabled = true;
-        this.render = webGLRenderer;
+        this.renderer = webGLRenderer;
         document.querySelector(this.el).appendChild(webGLRenderer.domElement);
+    }
+    //渲染
+    render(){
+        requestAnimationFrame(this.render);
+        this.renderer.render(this.scene, this.camera);
     }
 }
 

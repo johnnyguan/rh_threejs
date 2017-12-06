@@ -13,5 +13,6 @@ threejs要素：scene camera render
     },
     renderer:{
         size: 渲染器大小
-    }
+    },
+    initStat -- 是否开启stat
 }
