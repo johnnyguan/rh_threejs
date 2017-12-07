@@ -10,9 +10,34 @@ threejs要素：scene camera render
         ratio--相机视锥体的长宽比,
         far--相机视锥体的近平面,
         near--相机视锥体的远平面
-    },
-    renderer:{
-        size: 渲染器大小
-    },
-    initStat -- 是否开启stat
+    }
+}
+
+
+nodeInfo:{
+    img--图片
+    color--球体颜色
+    prop--对象，附加属性
+    pos:{
+        x
+        y
+        z
+    }
+}
+
+linkInfo:{
+    color--颜色
+    opacity--透明度
+    lineWidth--线宽
+    direction--方向 positive negative both
+    source:{
+        x
+        y
+        z
+    }
+    end:{
+        x
+        y
+        z
+    }
 }

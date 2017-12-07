@@ -95,6 +95,14 @@ var _is = __webpack_require__(2);
 
 var _is2 = _interopRequireDefault(_is);
 
+var _node = __webpack_require__(4);
+
+var _node2 = _interopRequireDefault(_node);
+
+var _link = __webpack_require__(5);
+
+var _link2 = _interopRequireDefault(_link);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -112,17 +120,14 @@ var RhytonThree = function () {
             if (_is2.default.object(cfg.camera)) {
                 this.cameraCfg = cfg.camera;
             }
-            if (!_is2.default.object(cfg.renderer)) {
-                console.log('未设置渲染器大小');
-                return;
-            } else {
-                this.rendererCfg = cfg.renderer;
-            }
 
             this.initScene();
             this.initCamera();
-            this.initRender();
-            this.render();
+            this.initRenderer();
+            this.initRaycaster();
+            this.initEvent();
+            this.nodes = [];
+            this.links = [];
         } else {
             console.log('没有配置项');
         }
@@ -141,10 +146,10 @@ var RhytonThree = function () {
         key: 'initCamera',
         value: function initCamera() {
             if (!_is2.default.object(this.cameraCfg)) {
-                this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.camera = new THREE.PerspectiveCamera(45, document.querySelector(this.el).clientWidth / document.querySelector(this.el).clientHeight, 0.1, 1000);
             } else {
                 var fov = this.cameraCfg.fov ? this.cameraCfg.fov : 45,
-                    ratio = this.cameraCfg.ratio ? this.cameraCfg.ratio : window.innerWidth / window.innerHeight,
+                    ratio = this.cameraCfg.ratio ? this.cameraCfg.ratio : document.querySelector(this.el).clientWidth / document.querySelector(this.el).clientHeight,
                     near = this.cameraCfg.near ? this.cameraCfg.near : 0.1,
                     far = this.cameraCfg.far ? this.cameraCfg.far : 1000;
                 this.camera = new THREE.PerspectiveCamera(fov, ratio, near, far);
@@ -157,22 +162,141 @@ var RhytonThree = function () {
         //初始化渲染器
 
     }, {
-        key: 'initRender',
-        value: function initRender() {
+        key: 'initRenderer',
+        value: function initRenderer() {
             var webGLRenderer = new THREE.WebGLRenderer();
             webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
-            webGLRenderer.setSize(this.rendererCfg.width, this.rendererCfg.height);
+            webGLRenderer.setSize(document.querySelector(this.el).clientWidth, document.querySelector(this.el).clientHeight);
             webGLRenderer.shadowMapEnabled = true;
             this.renderer = webGLRenderer;
             document.querySelector(this.el).appendChild(webGLRenderer.domElement);
         }
-        //渲染
+        //初始化raycaster
 
     }, {
-        key: 'render',
-        value: function render() {
-            requestAnimationFrame(this.render);
-            this.renderer.render(this.scene, this.camera);
+        key: 'initRaycaster',
+        value: function initRaycaster() {
+            this.raycaster = new THREE.Raycaster();
+        }
+    }, {
+        key: 'addNode',
+        value: function addNode(nodeInfo) {
+            var node = new _node2.default(nodeInfo).group;
+            this.scene.add(node);
+            this.nodes.push(node);
+        }
+    }, {
+        key: 'removeNode',
+        value: function removeNode(node) {
+            this.scene.remove(node);
+            var index = this.nodes.indexOf(node);
+            this.nodes.splice(index, 1);
+        }
+    }, {
+        key: 'removeAllNodes',
+        value: function removeAllNodes() {
+            var _this = this;
+
+            var childeren = this.scene.children.filter(function (v, i) {
+                return v.type === 'Group';
+            });
+            children.forEach(function (v, i) {
+                _this.scene.remove(v);
+            });
+        }
+    }, {
+        key: 'addLink',
+        value: function addLink(linkInfo) {
+            var link = new _link2.default(linkInfo).link;
+            this.scene.add(link);
+            this.links.push(link);
+        }
+    }, {
+        key: 'removeLink',
+        value: function removeLink(link) {
+            this.scene.remove(link);
+            var index = this.links.indexOf(link);
+            this.links.splice(index, 1);
+        }
+    }, {
+        key: 'removeAllLinks',
+        value: function removeAllLinks() {
+            var _this2 = this;
+
+            var childeren = this.scene.children.filter(function (v, i) {
+                return v.type === 'link';
+            });
+            children.forEach(function (v, i) {
+                _this2.scene.remove(v);
+            });
+        }
+    }, {
+        key: 'initEvent',
+        value: function initEvent() {
+            this.mouse = new THREE.Vector2();
+            this.width = document.querySelector(this.el).clientWidth;
+            this.height = document.querySelector(this.el).clientHeight;
+            this.renderer.domElement.addEventListener('mousemove', this.onDocumentMouseMove.bind(this), false);
+            this.renderer.domElement.addEventListener('mousedown', this.onDocumentMouseDown.bind(this), false);
+            // this.renderer.domElement.addEventListener('mouseup',this.onDocumentMouseUp.bind(this),false);
+        }
+    }, {
+        key: 'onDocumentMouseMove',
+        value: function onDocumentMouseMove(e) {
+            e.preventDefault();
+            var raycaster = this.raycaster,
+                mouse = this.mouse,
+                width = this.width,
+                height = this.height,
+                selected = this.selected;
+            mouse.x = e.clientX / width * 2 - 1;
+            mouse.y = -(e.clientY / height) * 2 + 1;
+
+            /* raycaster.setFromCamera(mouse,this.camera);
+            if(selected){
+                if(raycaster.ray.intersectPlane(plane,intersection)){
+                    SELECTED.position.copy(intersection.sub(offset));
+                }
+                updateRelateLine();
+                return
+            }
+                  var intersects = raycaster.intersectObjects(sphereObjects);
+            if(intersects.length>0){
+                if(INTERSECTED != intersects[0].object){
+                    if(INTERSECTED){
+                        INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
+                    }
+                    INTERSECTED = intersects[0].object;
+                    INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
+                    INTERSECTED.material.color.setHex('0x0000ff');
+                    plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(plane.normal),INTERSECTED.position);
+                }
+                container.style.cursor = 'pointer';
+                $('#nodetip').css({left:event.clientX+10,top:event.clientY+10}).text("类型："+INTERSECTED.nodeType+"值："+INTERSECTED.value).show();
+            }else {
+                if(INTERSECTED){
+                    INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
+                }
+                INTERSECTED = null;
+                container.style.cursor = 'auto';
+                $('#nodetip').hide();
+            } */
+        }
+    }, {
+        key: 'onDocumentMouseDown',
+        value: function onDocumentMouseDown(e) {
+            var raycaster = this.raycaster,
+                nodes = this.nodes;
+            e.preventDefault();
+            raycaster.setFromCamera(this.mouse, this.camera);
+            var intersects = raycaster.intersectObjects(nodes);
+            if (intersects.length > 0) {
+                this.selected = intersects[0].object;
+                /* if(raycaster.ray.intersectPlane(plane,intersection)){
+                    offset.copy(intersection).sub(SELECTED.position);
+                } */
+                container.style.cursor = 'move';
+            }
         }
     }]);
 
@@ -386,6 +510,157 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = typeof window === 'undefined' ? null : window; // eslint-disable-line no-undef
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Node = function () {
+    function Node(nodeInfo) {
+        _classCallCheck(this, Node);
+
+        var texturePart = this.genTexturePart(nodeInfo.img),
+            spherePart = this.genSpherePart(nodeInfo.color),
+            group = this.genGroup(texturePart, spherePart);
+        this.group = group;
+        this.group['_type'] = 'node';
+        this.bindProperty(nodeInfo.prop);
+        this.locateNode(nodeInfo.pos);
+    }
+
+    _createClass(Node, [{
+        key: 'genGroup',
+        value: function genGroup(texturePart, spherePart) {
+            var group = new THREE.Group();
+            group.add(texturePart);
+            group.add(spherePart);
+            return group;
+        }
+    }, {
+        key: 'genTexturePart',
+        value: function genTexturePart(img) {
+            var texture = THREE.ImageUtils.loadTexture(img),
+                mat = new THREE.MeshBasicMaterial({
+                map: texture,
+                transparent: true,
+                depthTest: false
+            }),
+                geometry = new THREE.SphereGeometry(5, 32, 32, 0, Math.PI * 0.6, 0.2 * Math.PI, 0.5 * Math.PI),
+                texturePart = new THREE.Mesh(geometry, mat);
+            return texturePart;
+        }
+    }, {
+        key: 'genSpherePart',
+        value: function genSpherePart(color) {
+            var ball = new THREE.SphereGeometry(5, 32, 32),
+                material = new THREE.MeshBasicMaterial({ color: color }),
+                spherePart = new THREE.Mesh(ball, material);
+            return spherePart;
+        }
+    }, {
+        key: 'bindProperty',
+        value: function bindProperty(prop) {
+            this.group['_prop'] = prop;
+        }
+    }, {
+        key: 'locateNode',
+        value: function locateNode(pos) {
+            this.group.position.x = pos.x;
+            this.group.position.y = pos.y;
+            this.group.position.z = pos.z;
+        }
+    }]);
+
+    return Node;
+}();
+
+exports.default = Node;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Link = function () {
+    function Link(linkInfo) {
+        _classCallCheck(this, Link);
+
+        var lineMat = this.genMat(linkInfo.color, linkInfo.opacity, linkInfo.lineWidth),
+            arrow = this.genArrow(linkInfo.direction, linkInfo.color),
+            link = this.genLine(linkInfo.source, linkInfo.end, lineMat, arrow);
+        this.link = link;
+        this.link['_type'] = 'link';
+    }
+
+    _createClass(Link, [{
+        key: 'genLine',
+        value: function genLine(source, end, material, arrow) {
+            var geometry = new THREE.Geometry();
+            var vertex1 = new THREE.Vector3(source.x, source.y, source.z);
+            var vertex2 = new THREE.Vector3(end.x, end.y, end.z);
+            geometry.vertices.push(vertex1);
+            geometry.vertices.push(vertex2);
+
+            var line = new THREE.Line(geometry, material);
+            var group = new THREE.Group();
+            group.add(line);
+            if (arrow) {
+                arrow.position.x = source.x - (source.x - end.x) * 2 / 4;
+                arrow.position.y = source.y - (source.y - end.y) * 2 / 4;
+                arrow.position.z = source.z - (source.z - end.z) * 2 / 4;
+                group.add(arrow);
+            }
+            return group;
+        }
+    }, {
+        key: 'genMat',
+        value: function genMat(color, opacity, lineWidth) {
+            return new THREE.LineBasicMaterial({ color: color, opacity: opacity, lineWidth: lineWidth });
+        }
+    }, {
+        key: 'genArrow',
+        value: function genArrow(direction, color) {
+            var arrGeo;
+            switch (direction) {
+                case 'positive':
+                    arrGeo = new THREE.CylinderGeometry(0, 0.5, 2);
+                    break;
+                case 'negative':
+                    arrGeo = new THREE.CylinderGeometry(0.5, 0, 2);
+                    break;
+                case 'both':
+                    return null;
+            }
+            var material = new THREE.MeshBasicMaterial({ color: color });
+            return new THREE.Mesh(arrGeo, material);
+        }
+    }]);
+
+    return Link;
+}();
+
+exports.default = Link;
 
 /***/ })
 /******/ ]);
