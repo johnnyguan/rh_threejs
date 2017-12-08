@@ -7,6 +7,8 @@
     <script type="text/javascript" src="../libs/three.js"></script>
     <script src="../../dist/rhyton_three.js"></script>
     <script type="text/javascript" src="../libs/stats.js"></script>
+    <script src="../libs/tween.min.js"></script>
+    <script src="../libs/TrackballControls.js"></script>
     <style>
         html,
         body {
@@ -46,7 +48,8 @@
                 x:20,
                 y:0,
                 z:20
-            }
+            },
+            nid:1
         })
 
         a.addNode({
@@ -56,10 +59,11 @@
                 name:'ddd12'
             },
             pos:{
-                x:20,
+                x:50,
                 y:20,
                 z:20
-            }
+            },
+            nid:2
         })
 
         a.addLink({
@@ -70,12 +74,14 @@
             source:{
                 x:20,
                 y:0,
-                z:20
+                z:20,
+                nid:1
             },
             end:{
-                x:20,
+                x:50,
                 y:20,
-                z:20
+                z:20,
+                nid:2
             }
         })
 
@@ -83,6 +89,7 @@
             requestAnimationFrame(render);
             a.renderer.render(a.scene, a.camera);
             stats.update();
+            a.controls.update();
         }
         var stats = new Stats();
         stats.setMode(0); // 0: fps, 1: ms

@@ -23,6 +23,7 @@ nodeInfo:{
         y
         z
     }
+    nid--节点id
 }
 
 linkInfo:{
@@ -41,3 +42,16 @@ linkInfo:{
         z
     }
 }
+
+
+var b =new THREE.Vector3(20,0,20).project( a.camera )
+undefined
+var halfWidth = window.innerWidth / 2;  
+var halfHeight = window.innerHeight / 2;  
+  
+var result = {  
+  
+    x: Math.round(b.x * halfWidth + halfWidth),  
+    y: Math.round(-b.y * halfHeight + halfHeight)  
+  
+};  

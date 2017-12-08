@@ -5,11 +5,12 @@ class Node{
             group = this.genGroup(texturePart,spherePart);
         this.group = group;
         this.group['_type']='node';
+        this.group.nid = nodeInfo.nid;
         this.bindProperty(nodeInfo.prop);
         this.locateNode(nodeInfo.pos);
     }
     genGroup(texturePart,spherePart){
-        var group = new THREE.Group();
+        var group = new THREE.Object3D();
         group.add( texturePart );
         group.add( spherePart );
         return group;
