@@ -449,37 +449,12 @@ var RhytonThree = function () {
                     end = v.end;
                 switch (v['_direction']) {
                     case 'positive':
-                        arrGeo = new THREE.CylinderGeometry(0, 0.5, 2);
-                        var color = new THREE.Color(v.children[0].material.color.r, v.children[0].material.color.g, v.children[0].material.color.b);
-                        var material = new THREE.MeshBasicMaterial({ color: color });
-                        v.remove(v.children[1]);
-                        var arrow = new THREE.Mesh(arrGeo, material);
-                        arrow.position.x = source.x - (source.x - end.x) * 2 / 4;
-                        arrow.position.y = source.y - (source.y - end.y) * 2 / 4;
-                        arrow.position.z = source.z - (source.z - end.z) * 2 / 4;
 
-                        var theta = new THREE.Vector3(-(source.x - end.x), -(source.y - end.y), 0).angleTo(new THREE.Vector3(0, 1, 0));
-                        if (end.x > source.x) {
-                            arrow.rotateZ(-theta);
-                        } else {
-                            arrow.rotateZ(theta);
-                        }
-
-                        /* var beta = new THREE.Vector3(0,-(source.y-end.y),-(source.z-end.z)).angleTo(new THREE.Vector3(0,1,0));
-                        if(end.y>source.y){
-                            arrow.rotateX(-beta);
-                        }else {
-                            arrow.rotateX(beta);
-                        } */
-
-                        v.add(arrow);
-
-                        break;
                     case 'negative':
-                        arrGeo = new THREE.CylinderGeometry(0.5, 0, 2);
                         var color = new THREE.Color(v.children[0].material.color.r, v.children[0].material.color.g, v.children[0].material.color.b);
-                        var material = new THREE.MeshBasicMaterial({ color: color });
-                        v.children[1] = new THREE.Mesh(arrGeo, material);
+
+                        var arrowHelper = new THREE.ArrowHelper(new THREE.Vector3(-source.x + end.x, -source.y + end.y, -source.z + end.z).normalize(), new THREE.Vector3(source.x - (source.x - end.x) * 2 / 4, source.y - (source.y - end.y) * 2 / 4, source.z - (source.z - end.z) * 2 / 4), 3, color, 3, 2);
+                        v.children[1] = arrowHelper;
                         break;
                 }
             });
@@ -794,7 +769,7 @@ var Link = function () {
         _classCallCheck(this, Link);
 
         var lineMat = this.genMat(linkInfo.color, linkInfo.opacity, linkInfo.lineWidth),
-            arrow = this.genArrow(linkInfo.direction, linkInfo.color),
+            arrow = this.genArrow(linkInfo.direction, linkInfo.color, new THREE.Vector3(-linkInfo.source.x + linkInfo.end.x, -linkInfo.source.y + linkInfo.end.y, -linkInfo.source.z + linkInfo.end.z), new THREE.Vector3(linkInfo.source.x - (linkInfo.source.x - linkInfo.end.x) * 2 / 4, linkInfo.source.y - (linkInfo.source.y - linkInfo.end.y) * 2 / 4, linkInfo.source.z - (linkInfo.source.z - linkInfo.end.z) * 2 / 4)),
             link = this.genLine(linkInfo.source, linkInfo.end, lineMat, arrow);
         this.link = link;
         this.link['_type'] = 'link';
@@ -816,21 +791,10 @@ var Link = function () {
             var group = new THREE.Group();
             group.add(line);
             if (arrow) {
-                arrow.position.x = source.x - (source.x - end.x) * 2 / 4;
-                arrow.position.y = source.y - (source.y - end.y) * 2 / 4;
-                arrow.position.z = source.z - (source.z - end.z) * 2 / 4;
-                var theta = new THREE.Vector3(-(source.x - end.x), -(source.y - end.y), 0).angleTo(new THREE.Vector3(0, 1, 0));
-                if (end.x > source.x) {
-                    arrow.rotateZ(-theta);
-                } else {
-                    arrow.rotateZ(theta);
-                }
-
-                // var beta = new THREE.Vector3(0,-(source.y-end.y),-(source.z-end.z)).angleTo(new THREE.Vector3(0,1,0));
-                // arrow.rotateX(-beta);
-                // arrow.lookAt(new THREE.Vector3(-source.x+end.x,-(source.y-end.y),-(source.z-end.z)))
+                console.log(arrow);
                 group.add(arrow);
             }
+
             group.sourceId = source.nid;
             group.endId = end.nid;
             return group;
@@ -842,20 +806,23 @@ var Link = function () {
         }
     }, {
         key: 'genArrow',
-        value: function genArrow(direction, color) {
-            var arrGeo;
+        value: function genArrow(direction, color, vector, origin) {
             switch (direction) {
                 case 'positive':
-                    arrGeo = new THREE.CylinderGeometry(0, 0.5, 2);
-                    break;
+                /* arrGeo = new THREE.CylinderGeometry(0,0.5,2);
+                break; */
                 case 'negative':
-                    arrGeo = new THREE.CylinderGeometry(0.5, 0, 2);
+                    // arrGeo = new THREE.CylinderGeometry(0.5,0,2);
+
+                    //normalize the direction vector (convert to vector of length 1)
+                    vector.normalize();
+
+                    var arrowHelper = new THREE.ArrowHelper(vector, origin, 3, color, 3, 2);
                     break;
                 case 'both':
                     return null;
             }
-            var material = new THREE.MeshBasicMaterial({ color: color });
-            return new THREE.Mesh(arrGeo, material);
+            return arrowHelper;
         }
     }]);
 

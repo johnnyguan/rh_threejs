@@ -1,7 +1,10 @@
 class Link{
     constructor(linkInfo){
         var lineMat = this.genMat(linkInfo.color,linkInfo.opacity,linkInfo.lineWidth),
-            arrow = this.genArrow(linkInfo.direction,linkInfo.color),
+            arrow = this.genArrow(linkInfo.direction,linkInfo.color,
+                new THREE.Vector3(-linkInfo.source.x+linkInfo.end.x,-linkInfo.source.y+linkInfo.end.y,-linkInfo.source.z+linkInfo.end.z),
+                new THREE.Vector3(linkInfo.source.x-(linkInfo.source.x-linkInfo.end.x)*2/4,linkInfo.source.y-(linkInfo.source.y-linkInfo.end.y)*2/4,linkInfo.source.z-(linkInfo.source.z-linkInfo.end.z)*2/4),
+            ),
             link = this.genLine(linkInfo.source,linkInfo.end,lineMat,arrow);
         this.link = link;
         this.link['_type']='link';
@@ -20,21 +23,10 @@ class Link{
         var group = new THREE.Group();
         group.add(line);
         if(arrow){
-            arrow.position.x = source.x-(source.x-end.x)*2/4;
-            arrow.position.y = source.y-(source.y-end.y)*2/4;
-            arrow.position.z = source.z-(source.z-end.z)*2/4;
-            var theta = new THREE.Vector3(-(source.x-end.x),-(source.y-end.y),0).angleTo(new THREE.Vector3(0,1,0));
-            if(end.x>source.x){
-                arrow.rotateZ(-theta);
-            }else {
-                arrow.rotateZ(theta);
-            }
-
-            // var beta = new THREE.Vector3(0,-(source.y-end.y),-(source.z-end.z)).angleTo(new THREE.Vector3(0,1,0));
-            // arrow.rotateX(-beta);
-            // arrow.lookAt(new THREE.Vector3(-source.x+end.x,-(source.y-end.y),-(source.z-end.z)))
+            console.log(arrow);
             group.add(arrow);
         }
+        
         group.sourceId = source.nid;
         group.endId = end.nid;
         return group;
@@ -42,20 +34,25 @@ class Link{
     genMat(color,opacity,lineWidth){
         return new THREE.LineBasicMaterial({color,opacity,lineWidth});
     }
-    genArrow(direction,color){
-        var arrGeo;
+    genArrow(direction,color,vector,origin){
         switch (direction) {
             case 'positive': 
-                arrGeo = new THREE.CylinderGeometry(0,0.5,2);
-                break;
+                /* arrGeo = new THREE.CylinderGeometry(0,0.5,2);
+                break; */
             case 'negative': 
-                arrGeo = new THREE.CylinderGeometry(0.5,0,2);
+                // arrGeo = new THREE.CylinderGeometry(0.5,0,2);
+                
+                //normalize the direction vector (convert to vector of length 1)
+                vector.normalize();
+                
+                
+                
+                var arrowHelper = new THREE.ArrowHelper( vector, origin, 3, color,3,2 );
                 break;
             case 'both':
                 return null
         }
-        var material = new THREE.MeshBasicMaterial( {color} );
-        return new THREE.Mesh( arrGeo, material );
+        return arrowHelper;
     }
 }
 export default Link

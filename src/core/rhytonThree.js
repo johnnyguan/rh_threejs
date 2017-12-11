@@ -307,38 +307,14 @@ class RhytonThree {
                 end = v.end;
             switch (v['_direction']) {
                 case 'positive':
-                    arrGeo = new THREE.CylinderGeometry(0, 0.5, 2);
-                    var color = new THREE.Color(v.children[0].material.color.r, v.children[0].material.color.g, v.children[0].material.color.b);
-                    var material = new THREE.MeshBasicMaterial({ color });
-                    v.remove(v.children[1]);
-                    var arrow = new THREE.Mesh(arrGeo, material);
-                    arrow.position.x = source.x - (source.x - end.x) * 2 / 4;
-                    arrow.position.y = source.y - (source.y - end.y) * 2 / 4;
-                    arrow.position.z = source.z - (source.z - end.z) * 2 / 4;
-
-                    var theta = new THREE.Vector3(-(source.x - end.x), -(source.y - end.y), 0).angleTo(new THREE.Vector3(0, 1, 0));
-                    if (end.x > source.x) {
-                        arrow.rotateZ(-theta);
-                    } else {
-                        arrow.rotateZ(theta);
-                    }
-
-
-                    /* var beta = new THREE.Vector3(0,-(source.y-end.y),-(source.z-end.z)).angleTo(new THREE.Vector3(0,1,0));
-                    if(end.y>source.y){
-                        arrow.rotateX(-beta);
-                    }else {
-                        arrow.rotateX(beta);
-                    } */
-
-                    v.add(arrow);
-
-                    break;
+                   
                 case 'negative':
-                    arrGeo = new THREE.CylinderGeometry(0.5, 0, 2);
                     var color = new THREE.Color(v.children[0].material.color.r, v.children[0].material.color.g, v.children[0].material.color.b);
-                    var material = new THREE.MeshBasicMaterial({ color });
-                    v.children[1] = new THREE.Mesh(arrGeo, material);
+                    
+                    var arrowHelper = new THREE.ArrowHelper( new THREE.Vector3(-source.x+end.x,-source.y+end.y,-source.z+end.z).normalize(),
+                        new THREE.Vector3(source.x-(source.x-end.x)*2/4,source.y-(source.y-end.y)*2/4,source.z-(source.z-end.z)*2/4), 
+                        3, color,3,2 );
+                    v.children[1] = arrowHelper;
                     break;
             }
 
