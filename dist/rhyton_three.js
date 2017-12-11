@@ -140,7 +140,7 @@ var RhytonThree = function () {
             //是否不变焦
             this.controls.noZoom = false;
             //是否不平移
-            this.controls.noPan = true;
+            this.controls.noPan = false;
             //可能是惯性 true没有惯性
             this.controls.staticMoving = false;
             //动态阻尼系数 就是灵敏度
@@ -158,6 +158,12 @@ var RhytonThree = function () {
         key: 'initScene',
         value: function initScene() {
             this.scene = new THREE.Scene();
+            var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(0, 0, 100);
+            this.scene.add(directionalLight);
+            var ambiColor = "#0c0c0c";
+            var ambientLight = new THREE.AmbientLight(ambiColor); //设置颜色
+            this.scene.add(ambientLight);
             // this.scene.background = new THREE.Color( 0xf0fff0 );
         }
         //初始化相机
@@ -200,7 +206,7 @@ var RhytonThree = function () {
     }, {
         key: 'initFloorPanel',
         value: function initFloorPanel() {
-            var plane = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000, 8, 8), new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true }));
+            var plane = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000, 8, 8), new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.01, transparent: true, wireframe: true }));
             plane.visible = true;
             this.plane = plane;
             this.scene.add(plane);
@@ -737,7 +743,7 @@ var Node = function () {
                 transparent: true,
                 depthTest: false
             }),
-                geometry = new THREE.SphereGeometry(5, 32, 32, 0, Math.PI * 0.6, 0.2 * Math.PI, 0.5 * Math.PI),
+                geometry = new THREE.SphereGeometry(5, 32, 32, Math.PI * 0.15, Math.PI * 0.55, 0.2 * Math.PI, 0.5 * Math.PI),
                 texturePart = new THREE.Mesh(geometry, mat);
             return texturePart;
         }
@@ -745,7 +751,7 @@ var Node = function () {
         key: 'genSpherePart',
         value: function genSpherePart(color) {
             var ball = new THREE.SphereGeometry(5, 32, 32),
-                material = new THREE.MeshBasicMaterial({ color: color }),
+                material = new THREE.MeshPhongMaterial({ color: color, emissive: color, specular: color }),
                 spherePart = new THREE.Mesh(ball, material);
             return spherePart;
         }

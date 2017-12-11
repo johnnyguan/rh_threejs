@@ -32,7 +32,7 @@ class RhytonThree {
             //是否不变焦
             this.controls.noZoom = false;
             //是否不平移
-            this.controls.noPan = true;
+            this.controls.noPan = false;
             //可能是惯性 true没有惯性
             this.controls.staticMoving = false;
             //动态阻尼系数 就是灵敏度
@@ -46,6 +46,12 @@ class RhytonThree {
     //初始化场景
     initScene() {
         this.scene = new THREE.Scene();
+        var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
+        directionalLight.position.set(0,0,100);
+        this.scene.add( directionalLight );
+        var ambiColor = "#0c0c0c";
+        var ambientLight = new THREE.AmbientLight(ambiColor);//设置颜色
+        this.scene.add(ambientLight);
         // this.scene.background = new THREE.Color( 0xf0fff0 );
     }
     //初始化相机
@@ -78,7 +84,7 @@ class RhytonThree {
     }
     initFloorPanel() {
         var plane = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000, 8, 8),
-            new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true }));
+            new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.01, transparent: true, wireframe: true }));
         plane.visible = true;
         this.plane = plane;
         this.scene.add(plane);

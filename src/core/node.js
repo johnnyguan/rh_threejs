@@ -22,13 +22,13 @@ class Node{
                 transparent: true,
                 depthTest: false
             } ),
-            geometry = new THREE.SphereGeometry( 5, 32, 32,0,Math.PI*0.6,0.2*Math.PI, 0.5*Math.PI),
+            geometry = new THREE.SphereGeometry( 5, 32, 32,Math.PI*0.15,Math.PI*0.55,0.2*Math.PI, 0.5*Math.PI),
             texturePart = new THREE.Mesh( geometry, mat );
         return texturePart;
     }
     genSpherePart(color){
         var ball = new THREE.SphereGeometry( 5, 32, 32),
-            material = new THREE.MeshBasicMaterial( {color} ),
+            material = new THREE.MeshPhongMaterial( {color:color,emissive:color,specular:color} ),
             spherePart = new THREE.Mesh(ball, material);
         return spherePart;
     }
